@@ -8,7 +8,7 @@
     </el-breadcrumb>
     <div>
       <el-input placeholder="请输入内容" v-model="searchVal" class="search-input">
-        <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click='handleSearch'></el-button>
       </el-input>
       <el-button type="primary" plain>添加用户</el-button>
     </div>
@@ -57,11 +57,15 @@ export default {
   methods: {
     // 初始化表格数据
     initList () {
-      getUserList({ query: '', pagenum: 1, pagesize: 10 })
+      getUserList({ query: this.searchVal, pagenum: 1, pagesize: 10 })
         .then(res => {
           console.log(res)
           this.tableData = res.data.data.users
         })
+    },
+    // 搜索用户
+    handleSearch () {
+      this.initList()
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
