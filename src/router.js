@@ -13,12 +13,29 @@ export default new Router({
       component: Login
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      path: '/home',
+      name: 'home',
+      component: Home,
+      // 当访问/ 让路由重定向到 欢迎页面
+      redirect: { name: 'welcome' },
+      children: [
+        {
+          path: '/welcome',
+          name: 'welcome',
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import(/* webpackChunkName: "welcome" */ './views/Welcome.vue')
+        },
+        {
+          path: '/users',
+          name: 'users',
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import(/* webpackChunkName: "users" */ './views/Users.vue')
+        }
+      ]
     }
   ]
 })
