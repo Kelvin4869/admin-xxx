@@ -23,8 +23,25 @@
       <el-table-column prop="mobile" label="电话">
       </el-table-column>
       <el-table-column prop="mg_state" label="状态">
+        <template slot-scope="scope">
+          <!-- 5.1 监听开关的change事件 -->
+          <el-switch
+            @change="handleChange(scope.row)"
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#c7c7c7">
+          </el-switch>
+        </template>
       </el-table-column>
       <el-table-column label="操作">
+        <template slot-scope="scope">
+          <!-- 点击编辑按钮 -->
+          <el-button size="mini" icon='el-icon-edit' type='primary' circle @click='handleEdit(scope.row)'></el-button>
+          <el-button size="mini" icon='el-icon-check' type='warning' circle></el-button>
+          <!-- scope.row获取到的是点击的那一行的数据 -->
+          <el-button size="mini" type="danger" icon='el-icon-delete'
+              @click="handleDelete(scope.row)" circle></el-button>
+        </template>
       </el-table-column>
     </el-table>
     <!-- 添加用户对话框 -->
@@ -48,6 +65,25 @@
           <el-button @click="addDialogFormVisible = false">取 消</el-button>
           <el-button type="primary" @click="confirmAdd">确 定</el-button>
         </div>
+    </el-dialog>
+    <!-- 4.1 编辑用户对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="editDialogFormVisible">
+        <!-- 在el-form组件上添加rules属性 -->
+        <el-form :model="editForm" :rules="myrules" ref="editRef">
+          <el-form-item label="用户名" label-width="90px">
+            <el-input v-model="editForm.username" autocomplete="off" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" label-width="90px" prop="email">
+            <el-input v-model="editForm.email" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="电话" label-width="90px" prop="mobile">
+            <el-input v-model="editForm.mobile" autocomplete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button @click="editDialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="confirmEdit">确 定</el-button>
+        </div>
       </el-dialog>
     <!-- 分页 -->
     <el-pagination
@@ -63,7 +99,7 @@
   </div>
 </template>
 <script>
-import { getUserList, addUser } from '@/api'
+import { getUserList, addUser, delUser, editUser } from '@/api'
 export default {
   data () {
     // 创建自定义校验规则
@@ -92,6 +128,13 @@ export default {
         password: '',
         email: '',
         mobile: ''
+      },
+      editDialogFormVisible: false,
+      editForm: {
+        username: '',
+        email: '',
+        mobile: '',
+        id: ''
       },
       myrules: {
         username: [
@@ -161,6 +204,52 @@ export default {
       // console.log('guanbi')
       // 清除校验信息
       this.$refs.addRef.clearValidate()
+    },
+    // 删除用户数据
+    handleDelete (row) {
+      console.log(row)
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 点击确定执行的操作
+        delUser(row.id)
+          .then(res => {
+            if (res.data.meta.status === 200) {
+              this.$message.success(res.data.meta.msg)
+              this.initList()
+            } else {
+              this.$message.error(res.data.meta.msg)
+            }
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 点击编辑按钮
+    handleEdit (row) {
+      this.editDialogFormVisible = true
+      this.editForm.username = row.username
+      this.editForm.email = row.email
+      this.editForm.mobile = row.mobile
+      this.editForm.id = row.id
+    },
+    // 确定编辑
+    confirmEdit () {
+      editUser(this.editForm)
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+            this.initList() // 刷新表格
+            this.editDialogFormVisible = false // 隐藏编辑对话框
+          } else {
+            this.$message.error(res.data.meta.msg)
+          }
+        })
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)

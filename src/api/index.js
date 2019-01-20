@@ -28,3 +28,9 @@ export const getUserList = obj => axios.get('users', { params: obj })
 
 // 添加用户
 export const addUser = obj => axios.post('users', obj)
+
+// 删除用户
+export const delUser = id => axios.delete(`users/${id}`)
+
+// 编辑用户
+export const editUser = obj => axios.put(`users/${obj.id}`, obj)
