@@ -25,3 +25,6 @@ export const login = obj => axios.post('login', obj)
 
 // 用户数据列表获取
 export const getUserList = obj => axios.get('users', { params: obj })
+
+// 添加用户
+export const addUser = obj => axios.post('users', obj)

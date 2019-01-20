@@ -10,7 +10,7 @@
       <el-input placeholder="请输入内容" v-model="searchVal" class="search-input">
         <el-button slot="append" icon="el-icon-search" @click='handleSearch'></el-button>
       </el-input>
-      <el-button type="primary" plain>添加用户</el-button>
+      <el-button type="primary" plain @click='handleAdd'>添加用户</el-button>
     </div>
     <!-- 表格 -->
     <el-table :data="tableData" border style="width: 100%" class="mt-15 mb-15">
@@ -27,6 +27,28 @@
       <el-table-column label="操作">
       </el-table-column>
     </el-table>
+    <!-- 添加用户对话框 -->
+    <el-dialog title="添加用户" :visible.sync="addDialogFormVisible" @close='handleDialogClose'>
+      <!-- 在el-form组件上面添加rules属性 -->
+        <el-form :model="addForm" :rules='myrules' ref='addRef'>
+          <el-form-item label="用户名" label-width="90px" prop="username">
+            <el-input v-model="addForm.username" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="密码" label-width="90px" prop="password">
+            <el-input v-model="addForm.password" type="password" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" label-width="90px" prop="email">
+            <el-input v-model="addForm.email" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="电话" label-width="90px" prop="mobile">
+            <el-input v-model="addForm.mobile" autocomplete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button @click="addDialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="confirmAdd">确 定</el-button>
+        </div>
+      </el-dialog>
     <!-- 分页 -->
     <el-pagination
       class="page"
@@ -41,13 +63,51 @@
   </div>
 </template>
 <script>
-import { getUserList } from '@/api'
+import { getUserList, addUser } from '@/api'
 export default {
   data () {
+    // 创建自定义校验规则
+    let checkEmail = (rule, value, cb) => {
+      if (value === '') {
+        cb(new Error('请输入邮箱'))
+      } else {
+        // 判断格式是否正确
+        let emailReg = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/
+        if (emailReg.test(value)) {
+          // 校验通过
+          cb()
+        } else {
+          // 校验不通过
+          cb(new Error('请输入正确邮箱格式'))
+        }
+      }
+    }
     return {
-      searchVal: '',
-      currentPage4: 4,
-      tableData: []
+      searchVal: '', // 搜索数据
+      currentPage4: 4, // 页面数据条数
+      tableData: [], // 表格数据
+      addDialogFormVisible: false, // 控制添加用户对话框的显示与否
+      addForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      myrules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' }
+        ],
+        email: [
+          { validator: checkEmail, trigger: ['blur', 'change'] }
+        ],
+        mobile: [
+          { required: true, message: '请输入电话号码', trigger: 'blur' }
+        ]
+      },
+      loading: true // loading动画空
     }
   },
   created () {
@@ -67,6 +127,41 @@ export default {
     handleSearch () {
       this.initList()
     },
+    // 添加用户按钮事件
+    handleAdd () {
+      this.addDialogFormVisible = true
+    },
+    // 确定添加
+    confirmAdd () {
+      this.$refs.addRef.validate(isPass => {
+        if (isPass) {
+          // 发请求
+          addUser(this.addForm)
+            .then(res => {
+              console.log(res)
+              if (res.data.meta.status === 201) {
+                // 添加成功,弹成功提示信息,刷新表格,弹框隐藏,清空表格
+                this.$message.success(res.data.meta.msg)
+                this.initList()
+                this.addDialogFormVisible = false
+                this.addForm.username = ''
+                this.addForm.password = ''
+                this.addForm.email = ''
+                this.addForm.mobile = ''
+              } else {
+                this.$message.error(res.data.meta.msg)
+              }
+            })
+        } else {
+          this.$message.error('请输入正确的信息')
+        }
+      })
+    },
+    handleDialogClose () {
+      // console.log('guanbi')
+      // 清除校验信息
+      this.$refs.addRef.clearValidate()
+    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
     },
@@ -75,7 +170,6 @@ export default {
     }
   }
 }
-
 </script>
 <style lang="scss" scoped>
 .search-input {
