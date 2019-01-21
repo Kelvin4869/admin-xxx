@@ -5,7 +5,7 @@ axios.defaults.baseURL = 'http://localhost:8888/api/private/v1/'
 // 使用拦截器,作用将所有的请求拦截下来,执行自己的逻辑,当前的需求是给所有的请求添加请求头
 axios.interceptors.request.use(function (config) {
   // config表示请求对象,这个请求对象必须return回去
-  console.log(config)
+  // console.log(config)
   let token = localStorage.getItem('token')
   if (token) {
     config.headers.Authorization = token
@@ -34,3 +34,6 @@ export const delUser = id => axios.delete(`users/${id}`)
 
 // 编辑用户
 export const editUser = obj => axios.put(`users/${obj.id}`, obj)
+
+// 修改用户状态
+export const changeUserState = (uid, type) => axios.put(`users/${uid}/state/${type}`)

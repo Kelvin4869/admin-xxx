@@ -45,7 +45,7 @@
       </el-table-column>
     </el-table>
     <!-- 添加用户对话框 -->
-    <el-dialog title="添加用户" :visible.sync="addDialogFormVisible" @close='handleDialogClose'>
+    <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
       <!-- 在el-form组件上面添加rules属性 -->
         <el-form :model="addForm" :rules='myrules' ref='addRef'>
           <el-form-item label="用户名" label-width="90px" prop="username">
@@ -86,20 +86,21 @@
         </div>
       </el-dialog>
     <!-- 分页 -->
+    <!-- page-size:表示默认上来每页显示多少条 -->
     <el-pagination
       class="page"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
-      :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :current-page="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      :page-size="10"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="400">
+      :total="totalNum">
     </el-pagination>
   </div>
 </template>
 <script>
-import { getUserList, addUser, delUser, editUser } from '@/api'
+import { getUserList, addUser, delUser, editUser, changeUserState } from '@/api'
 export default {
   data () {
     // 创建自定义校验规则
@@ -120,7 +121,10 @@ export default {
     }
     return {
       searchVal: '', // 搜索数据
-      currentPage4: 4, // 页面数据条数
+      currentPage: 1, // 页面数据条数,默认展示第一页
+      totalNum: 0, // 数据总条数,默认为0
+      pagenum: 1, // 当前页码默认为1
+      pagesize: 10, // 每页显示条数默认10条
       tableData: [], // 表格数据
       addDialogFormVisible: false, // 控制添加用户对话框的显示与否
       addForm: {
@@ -160,19 +164,26 @@ export default {
   methods: {
     // 初始化表格数据
     initList () {
-      getUserList({ query: this.searchVal, pagenum: 1, pagesize: 10 })
+      getUserList({ query: this.searchVal, pagenum: this.pagenum, pagesize: this.pagesize })
         .then(res => {
-          console.log(res)
+          // console.log(res)
           this.tableData = res.data.data.users
+          // 给totalNum赋值
+          this.totalNum = res.data.data.total
         })
     },
     // 搜索用户
     handleSearch () {
+      // 查找之前把pagenum置为1
+      this.pagenum = 1
       this.initList()
     },
     // 添加用户按钮事件
     handleAdd () {
       this.addDialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs.addRef.clearValidate()
+      })
     },
     // 确定添加
     confirmAdd () {
@@ -200,11 +211,11 @@ export default {
         }
       })
     },
-    handleDialogClose () {
-      // console.log('guanbi')
-      // 清除校验信息
-      this.$refs.addRef.clearValidate()
-    },
+    // handleDialogClose () {
+    //   // console.log('guanbi')
+    //   // 清除校验信息
+    //   this.$refs.addRef.clearValidate()
+    // },
     // 删除用户数据
     handleDelete (row) {
       console.log(row)
@@ -251,11 +262,30 @@ export default {
           }
         })
     },
+    //  切换开关
+    handleChange (row) {
+      // console.log('123')
+      changeUserState(row.id, row.mg_state)
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+            this.initList() // 刷新表格
+          } else {
+            this.$message.error(res.data.meta.msg)
+          }
+        })
+    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
+      this.pagesize = val
+      // 赋值完每页条数后重新发请求
+      this.initList()
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
+      this.pagenum = val
+      // 复制完当前页之后重新发请求
+      this.initList()
     }
   }
 }
