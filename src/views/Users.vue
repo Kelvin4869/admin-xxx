@@ -38,7 +38,7 @@
         <template slot-scope="scope">
           <!-- 点击编辑按钮 -->
           <el-button size="mini" icon='el-icon-edit' type='primary' circle @click='handleEdit(scope.row)'></el-button>
-          <el-button size="mini" icon='el-icon-check' type='warning' circle></el-button>
+          <el-button size="mini" icon='el-icon-check' type='warning' @click='handleCheck' circle></el-button>
           <!-- scope.row获取到的是点击的那一行的数据 -->
           <el-button size="mini" type="danger" icon='el-icon-delete'
               @click="handleDelete(scope.row)" circle></el-button>
@@ -84,6 +84,28 @@
         <div slot="footer">
           <el-button @click="editDialogFormVisible = false">取 消</el-button>
           <el-button type="primary" @click="confirmEdit">确 定</el-button>
+        </div>
+      </el-dialog>
+    <!-- 分配用户角色对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="checkDialogFormVisible">
+        <el-form :model="checkForm">
+          <el-form-item label="当前的用户" label-width="90px">
+            <el-tag type="warning">标签四</el-tag>
+          </el-form-item>
+          <el-form-item label="请选择角色" label-width="90px">
+            <el-select v-model="value" placeholder="请选择">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button @click="checkDialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="confirmCheck">确 定</el-button>
         </div>
       </el-dialog>
     <!-- 分页 -->
@@ -141,6 +163,28 @@ export default {
         mobile: '',
         id: ''
       },
+      checkDialogFormVisible: false,
+      checkForm: {
+        username: ''
+      },
+      // 下拉选择器的数据
+      options: [{
+        value: '选项1',
+        label: '黄金糕'
+      }, {
+        value: '选项2',
+        label: '双皮奶'
+      }, {
+        value: '选项3',
+        label: '蚵仔煎'
+      }, {
+        value: '选项4',
+        label: '龙须面'
+      }, {
+        value: '选项5',
+        label: '北京烤鸭'
+      }],
+      value: '',
       myrules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' }
@@ -280,11 +324,19 @@ export default {
           }
         })
     },
+    // 点击分配角色按钮
+    handleCheck () {
+      this.checkDialogFormVisible = true
+    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
       this.pagesize = val
       // 赋值完每页条数后重新发请求
       this.initList()
+    },
+    // 提交分配角色
+    confirmCheck () {
+      console.log('123')
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
