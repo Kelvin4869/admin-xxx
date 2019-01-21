@@ -13,7 +13,8 @@
       <el-button type="primary" plain @click='handleAdd'>添加用户</el-button>
     </div>
     <!-- 表格 -->
-    <el-table :data="tableData" border style="width: 100%" class="mt-15 mb-15">
+    <!-- v-loading自定义指令是element定义的,通过布尔值控制 -->
+    <el-table v-loading='loading' :data="tableData" border style="width: 100%" class="mt-15 mb-15">
       <el-table-column type="index" width="50">
       </el-table-column>
       <el-table-column prop="username" label="姓名" width="180">
@@ -154,7 +155,7 @@ export default {
           { required: true, message: '请输入电话号码', trigger: 'blur' }
         ]
       },
-      loading: true // loading动画空
+      loading: true // loading动画控制
     }
   },
   created () {
@@ -164,12 +165,16 @@ export default {
   methods: {
     // 初始化表格数据
     initList () {
+      // 在刷新数据之前,先把loading置为true,不然会出现没有loading动画的情况
+      this.loading = true
       getUserList({ query: this.searchVal, pagenum: this.pagenum, pagesize: this.pagesize })
         .then(res => {
           // console.log(res)
           this.tableData = res.data.data.users
           // 给totalNum赋值
           this.totalNum = res.data.data.total
+          // 数据加载完之后,loading置为false
+          this.loading = false
         })
     },
     // 搜索用户
