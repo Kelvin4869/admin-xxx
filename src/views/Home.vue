@@ -38,8 +38,14 @@
           </div>
         </el-header>
         <el-main>
-          <!-- 用于匹配子路由的组件 -->
-          <router-view></router-view>
+          <transition
+            enter-active-class='animated fadeIn'
+            leave-active-class='animated fadeOut'
+            mode='out-in'
+          >
+            <!-- 用于匹配子路由的组件 -->
+            <router-view></router-view>
+          </transition>
         </el-main>
       </el-container>
     </el-container>
