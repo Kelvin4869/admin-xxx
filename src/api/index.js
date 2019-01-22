@@ -43,3 +43,6 @@ export const getRoleList = () => axios.get('roles')
 
 // 给用户分配角色
 export const grantUserRole = (id, rid) => axios.put(`users/${id}/role`, { rid: rid })
+
+// 获取权限列表数据
+export const getRights = type => axios.get(`rights/${type}`)

@@ -22,6 +22,17 @@
               <span>用户列表</span>
             </el-menu-item>
           </el-submenu>
+          <el-submenu index="2">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>权限管理</span>
+            </template>
+            <!-- index会作为路由的path进行跳转,因为已经开启router路由模式 -->
+            <el-menu-item index="/rights">
+              <i class="el-icon-tickets"></i>
+              <span>权限列表</span>
+            </el-menu-item>
+          </el-submenu>
         </el-menu>
       </el-aside>
       <el-container>
