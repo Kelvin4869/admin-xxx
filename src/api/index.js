@@ -46,3 +46,6 @@ export const grantUserRole = (id, rid) => axios.put(`users/${id}/role`, { rid: r
 
 // 获取权限列表数据
 export const getRights = type => axios.get(`rights/${type}`)
+
+// 删除角色指定权限
+export const delUserRight = (roleId, rightId) => axios.delete(`roles/${roleId}/rights/${rightId}`)

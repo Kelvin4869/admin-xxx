@@ -14,17 +14,17 @@
           <!-- firstChildItem表示第一个children中的每一项 -->
           <el-row v-for='firstChildItem in scope.row.children' :key='firstChildItem.id'>
             <el-col :span='4'>
-              <el-tag>{{firstChildItem.authName}}</el-tag>
+              <el-tag closable>{{firstChildItem.authName}}</el-tag>
             </el-col>
             <el-col :span='20'>
               <!-- v-for加给el-row -->
               <el-row v-for='secondChildItem in firstChildItem.children' :key='secondChildItem.id'>
                 <el-col :span='4'>
-                  <el-tag type='success'>{{secondChildItem.authName}}</el-tag>
+                  <el-tag closable type='success'>{{secondChildItem.authName}}</el-tag>
                 </el-col>
                 <el-col :span='20'>
                   <!-- 这个v-for直接加给el-tag组件 -->
-                  <el-tag type='warning' v-for='lastChildItem in secondChildItem.children' :key='lastChildItem.id'>{{lastChildItem.authName}}</el-tag>
+                  <el-tag closable type='warning' v-for='lastChildItem in secondChildItem.children' :key='lastChildItem.id' @close='handleClose(scope.row.id, lastChildItem.id)'>{{lastChildItem.authName}}</el-tag>
                 </el-col>
               </el-row>
             </el-col>
@@ -50,7 +50,7 @@
   </div>
 </template>
 <script>
-import { getRoleList } from '@/api'
+import { getRoleList, delUserRight } from '@/api'
 export default {
   data () {
     return {
@@ -65,6 +65,18 @@ export default {
       getRoleList()
         .then(res => {
           this.tableData = res.data.data
+        })
+    },
+    // 点击tag组件的删除
+    handleClose (roleId, rightId) {
+      // console.log('123')
+      delUserRight(roleId, rightId)
+        .then(res => {
+          console.log(res)
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+            this.initList()
+          }
         })
     }
   }
