@@ -38,7 +38,7 @@
         <template slot-scope="scope">
           <!-- 点击编辑按钮 -->
           <el-button size="mini" icon='el-icon-edit' type='primary' circle @click='handleEdit(scope.row)'></el-button>
-          <el-button size="mini" icon='el-icon-check' type='warning' @click='handleCheck' circle></el-button>
+          <el-button size="mini" icon='el-icon-check' type='warning' @click='handleCheck(scope.row)' circle></el-button>
           <!-- scope.row获取到的是点击的那一行的数据 -->
           <el-button size="mini" type="danger" icon='el-icon-delete'
               @click="handleDelete(scope.row)" circle></el-button>
@@ -90,15 +90,17 @@
     <el-dialog title="编辑用户" :visible.sync="checkDialogFormVisible">
         <el-form :model="checkForm">
           <el-form-item label="当前的用户" label-width="90px">
-            <el-tag type="warning">标签四</el-tag>
+            <el-tag type="warning">{{checkForm.username}}</el-tag>
           </el-form-item>
           <el-form-item label="请选择角色" label-width="90px">
-            <el-select v-model="value" placeholder="请选择">
+            <el-select v-model="selectRoleId" placeholder="请选择">
+              <!-- label表示显示的数据 -->
+              <!-- value表示选择的数据 -->
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="item in selectData"
+                :key="item.id"
+                :label="item.roleName"
+                :value="item.id">
               </el-option>
             </el-select>
           </el-form-item>
@@ -123,7 +125,7 @@
   </div>
 </template>
 <script>
-import { getUserList, addUser, delUser, editUser, changeUserState } from '@/api'
+import { getUserList, addUser, delUser, editUser, changeUserState, getRoleList, grantUserRole } from '@/api'
 export default {
   data () {
     // 创建自定义校验规则
@@ -165,26 +167,14 @@ export default {
       },
       checkDialogFormVisible: false,
       checkForm: {
-        username: ''
+        username: '',
+        id: ''
       },
+
       // 下拉选择器的数据
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      value: '',
+      selectData: [],
+      selectRoleId: '', // 保存用户选择的角色ID
+
       myrules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' }
@@ -325,18 +315,45 @@ export default {
         })
     },
     // 点击分配角色按钮
-    handleCheck () {
+    handleCheck (row) {
+      // 将点击的username存起来
+      this.checkForm.username = row.username
+      // 将点击的用户id保存起来
+      this.checkForm.id = row.id
+      // 点击分配角色按钮是将当前用户的roleName赋值给选中的角色id,即selectRoleId属性
+      this.selectRoleId = row.role_name
+      // 获取角色列表数据
+      getRoleList()
+        .then(res => {
+          console.log(res)
+          this.selectData = res.data.data
+        })
       this.checkDialogFormVisible = true
+    },
+    // 提交分配角色
+    confirmCheck () {
+      // console.log('123')
+      // 调用分配角色方法
+      // 判断selectRoleId的类型,如果是字符串,说明用户没有更改,不应该发请求
+      if (typeof this.selectRoleId === 'string') {
+        this.checkDialogFormVisible = false
+        return false
+      }
+      grantUserRole(this.checkForm.id, this.selectRoleId)
+        .then(res => {
+          console.log(res)
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+            this.checkDialogFormVisible = false
+            this.initList()
+          }
+        })
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
       this.pagesize = val
       // 赋值完每页条数后重新发请求
       this.initList()
-    },
-    // 提交分配角色
-    confirmCheck () {
-      console.log('123')
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)

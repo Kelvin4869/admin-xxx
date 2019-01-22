@@ -37,3 +37,9 @@ export const editUser = obj => axios.put(`users/${obj.id}`, obj)
 
 // 修改用户状态
 export const changeUserState = (uid, type) => axios.put(`users/${uid}/state/${type}`)
+
+// 获取角色列表
+export const getRoleList = () => axios.get('roles')
+
+// 给用户分配角色
+export const grantUserRole = (id, rid) => axios.put(`users/${id}/role`, { rid: rid })
