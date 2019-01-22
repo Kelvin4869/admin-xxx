@@ -14,19 +14,30 @@
           <!-- firstChildItem表示第一个children中的每一项 -->
           <el-row v-for='firstChildItem in scope.row.children' :key='firstChildItem.id'>
             <el-col :span='4'>
-              <el-tag closable>{{firstChildItem.authName}}</el-tag>
+              <el-tag closable @close='handleClose(scope.row.id, firstChildItem.id, scope.row)'>
+                {{firstChildItem.authName}}
+              </el-tag>
+              <i class="el-icon-arrow-right" v-if='firstChildItem.children.length > 0'></i>
             </el-col>
             <el-col :span='20'>
               <!-- v-for加给el-row -->
               <el-row v-for='secondChildItem in firstChildItem.children' :key='secondChildItem.id'>
                 <el-col :span='4'>
-                  <el-tag closable type='success'>{{secondChildItem.authName}}</el-tag>
+                  <el-tag closable type='success' @close='handleClose(scope.row.id, secondChildItem.id, scope.row)'>
+                    {{secondChildItem.authName}}
+                  </el-tag>
+                  <i class="el-icon-arrow-right"  v-if='secondChildItem.children.length > 0'></i>
                 </el-col>
                 <el-col :span='20'>
                   <!-- 这个v-for直接加给el-tag组件 -->
-                  <el-tag closable type='warning' v-for='lastChildItem in secondChildItem.children' :key='lastChildItem.id' @close='handleClose(scope.row.id, lastChildItem.id)'>{{lastChildItem.authName}}</el-tag>
+                  <el-tag closable type='warning' v-for='lastChildItem in secondChildItem.children' :key='lastChildItem.id' @close='handleClose(scope.row.id, lastChildItem.id, scope.row)'>{{lastChildItem.authName}}</el-tag>
                 </el-col>
               </el-row>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span='24'>
+              <el-tag type='info' v-if='scope.row.children.length <= 0'>该角色还未授权,请前往授权!</el-tag>
             </el-col>
           </el-row>
         </template>
@@ -68,14 +79,15 @@ export default {
         })
     },
     // 点击tag组件的删除
-    handleClose (roleId, rightId) {
+    handleClose (roleId, rightId, row) {
       // console.log('123')
       delUserRight(roleId, rightId)
         .then(res => {
           console.log(res)
           if (res.data.meta.status === 200) {
             this.$message.success(res.data.meta.msg)
-            this.initList()
+            // this.initList()
+            row.children = res.data.data
           }
         })
     }
