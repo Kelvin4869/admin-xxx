@@ -10,7 +10,25 @@
     <el-table :data="tableData" border style="width: 100%" class="mt-15 mb-15">
       <el-table-column type="expand">
         <template slot-scope='scope'>
-          <el-tag>{{scope.row.roleName}}</el-tag>
+          <!-- 一个角色的所有权限都保存在这个角色对象,也就是scope.row.children -->
+          <!-- firstChildItem表示第一个children中的每一项 -->
+          <el-row v-for='firstChildItem in scope.row.children' :key='firstChildItem.id'>
+            <el-col :span='4'>
+              <el-tag>{{firstChildItem.authName}}</el-tag>
+            </el-col>
+            <el-col :span='20'>
+              <!-- v-for加给el-row -->
+              <el-row v-for='secondChildItem in firstChildItem.children' :key='secondChildItem.id'>
+                <el-col :span='4'>
+                  <el-tag type='success'>{{secondChildItem.authName}}</el-tag>
+                </el-col>
+                <el-col :span='20'>
+                  <!-- 这个v-for直接加给el-tag组件 -->
+                  <el-tag type='warning' v-for='lastChildItem in secondChildItem.children' :key='lastChildItem.id'>{{lastChildItem.authName}}</el-tag>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
         </template>
       </el-table-column>
       <el-table-column type="index" width="50">
@@ -52,3 +70,10 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+.roles {
+  .el-tag {
+    margin: 5px 5px 5px 0;
+  }
+}
+</style>
