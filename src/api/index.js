@@ -49,3 +49,6 @@ export const getRights = type => axios.get(`rights/${type}`)
 
 // 删除角色指定权限
 export const delUserRight = (roleId, rightId) => axios.delete(`roles/${roleId}/rights/${rightId}`)
+
+// 角色授权
+export const grantRoleRight = (roleId, rids) => axios.post(`roles/${roleId}/rights`, { rids: rids })
