@@ -52,3 +52,6 @@ export const delUserRight = (roleId, rightId) => axios.delete(`roles/${roleId}/r
 
 // 角色授权
 export const grantRoleRight = (roleId, rids) => axios.post(`roles/${roleId}/rights`, { rids: rids })
+
+// 左侧菜单权限获取
+export const getMenus = () => axios.get('menus')

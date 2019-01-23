@@ -6,35 +6,21 @@
           <el-menu
           default-active="2"
           router
+          unique-opened
           :collapse='iscollapse'
           class="el-menu-admin"
           background-color="#f9f9f9"
           @open="handleOpen"
           @close="handleClose">
-          <el-submenu index="1">
+          <el-submenu :index="menu.path" v-for='menu in menuList' :key='menu.id'>
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{menu.authName}}</span>
             </template>
             <!-- index会作为路由的path进行跳转,因为已经开启router路由模式 -->
-            <el-menu-item index="/users">
+            <el-menu-item :index="submenu.path" v-for='submenu in menu.children' :key='submenu.id'>
               <i class="el-icon-tickets"></i>
-              <span>用户列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <!-- index会作为路由的path进行跳转,因为已经开启router路由模式 -->
-            <el-menu-item index="/rights">
-              <i class="el-icon-tickets"></i>
-              <span>权限列表</span>
-            </el-menu-item>
-            <el-menu-item index="/roles">
-              <i class="el-icon-tickets"></i>
-              <span>角色列表</span>
+              <span>{{submenu.authName}}</span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
@@ -69,17 +55,27 @@
 
 <script>
 // import { getUserList } from '@/api'
+import { getMenus } from '@/api'
 export default {
   created () {
     this.username = localStorage.getItem('username')
+    this.initMenus()
   },
   data () {
     return {
       iscollapse: false,
-      username: ''
+      username: '',
+      menuList: [] // 保存菜单数据
     }
   },
   methods: {
+    initMenus () {
+      getMenus()
+        .then(res => {
+          console.log(res)
+          this.menuList = res.data.data
+        })
+    },
     handleOpen (key, keyPath) {
       console.log(key, keyPath)
     },
