@@ -55,3 +55,9 @@ export const grantRoleRight = (roleId, rids) => axios.post(`roles/${roleId}/righ
 
 // 左侧菜单权限获取
 export const getMenus = () => axios.get('menus')
+
+// 获取商品分类数据
+export const getCates = (type, pagenum, pagesize) => axios.get('categories', { params: { type, pagenum, pagesize } })
+
+// 添加分类
+export const addCate = obj => axios.post('categories', obj)
