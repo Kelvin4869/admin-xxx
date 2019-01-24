@@ -58,6 +58,22 @@ export default new Router({
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
           component: () => import(/* webpackChunkName: "categories" */ './views/goods/Cate.vue')
+        },
+        {
+          path: '/goods',
+          name: 'goods',
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import(/* webpackChunkName: "goods" */ './views/goods/GoodsList.vue')
+        },
+        {
+          path: '/addgoods',
+          name: 'addgoods',
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import(/* webpackChunkName: "addgoods" */ './views/goods/AddGoods.vue')
         }
       ]
     }
